@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS } from "../constants/theme";
 
@@ -22,6 +22,13 @@ export default function Welcome() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View>
+        <Image
+          resizeMode="contain"
+          style={styles.img}
+          source={require("../assets/images/wallet.png")}
+        />
+      </View>
       <Text style={styles.title}>Welcome to Expense Tracker</Text>
       <Text style={styles.subtitle}>
         Track your spending, manage budgets, and stay in control of your money.
@@ -39,6 +46,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: COLORS.bg,
+  },
+  img: {
+    height: 150,
+    marginBottom: 24,
   },
   title: {
     fontFamily: "poppins-bold",
