@@ -36,7 +36,7 @@ export default function CustomTabBar({ state, descriptors, navigation }) {
           {
             position: "absolute",
             left: 0,
-            backgroundColor: COLORS.secondary,
+            backgroundColor: COLORS.white,
             borderRadius: 1000,
             marginHorizontal: 12,
             height: dimensions.height - 15,
@@ -86,7 +86,7 @@ export default function CustomTabBar({ state, descriptors, navigation }) {
             isFocused={isFocused}
             label={label}
             routeName={route.name}
-            color={isFocused ? COLORS.primary : "#969696"}
+            color={isFocused ? COLORS.primary : "#ffffff"}
           />
         );
       })}
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     position: "absolute",
     bottom: 5,
-    backgroundColor: "white",
+    backgroundColor: COLORS.secondary,
     justifyContent: "center",
     alignItems: "center",
     paddingVertical: 10,

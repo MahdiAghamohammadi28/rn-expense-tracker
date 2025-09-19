@@ -71,14 +71,14 @@ export default function TabBarButton({
     >
       <Animated.View style={animatedIconStyle}>
         {icon[routeName]({
-          color: isFocused ? COLORS.white : "#969696",
+          color: isFocused ? COLORS.primary : "#fff",
         })}
       </Animated.View>
       <Animated.Text
         style={[
           styles.tabbarLabel,
           animationTextStyle,
-          { color: isFocused ? COLORS.primary : "#969696" },
+          { color: isFocused ? COLORS.primary : "#fff" },
         ]}
       >
         {label}
