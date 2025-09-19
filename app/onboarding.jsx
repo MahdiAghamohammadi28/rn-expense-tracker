@@ -4,38 +4,17 @@ import React, { useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
+  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ONBOARDING_DATA } from "../constants/onboarding-data";
 import { COLORS } from "../constants/theme";
 
 const { width: screenWidth } = Dimensions.get("window");
-
-const DUMMY_DATA = [
-  {
-    id: "d1",
-    title: "Track Your Spending",
-    description:
-      "Easily log your daily expenses and income to keep your finances organized.",
-    image: "💰", // You can replace with actual images
-  },
-  {
-    id: "d2",
-    title: "Stay Within Budget",
-    description:
-      "Set category-based budgets and monitor progress with smart insights.",
-    image: "📊",
-  },
-  {
-    id: "d3",
-    title: "Understand Your Finances",
-    description: "Get clear charts and analytics to see where your money goes.",
-    image: "📈",
-  },
-];
 
 export default function Onboarding() {
   const router = useRouter();
@@ -55,7 +34,7 @@ export default function Onboarding() {
   const renderSlide = ({ item }) => (
     <View style={styles.slide}>
       <View style={styles.imageContainer}>
-        <Text style={styles.emoji}>{item.image}</Text>
+        <Image source={item.image} style={styles.img} resizeMode="contain" />
       </View>
       <View style={styles.textContainer}>
         <Text style={styles.title}>{item.title}</Text>
@@ -67,7 +46,7 @@ export default function Onboarding() {
   const renderDots = () => {
     return (
       <View style={styles.dotsContainer}>
-        {DUMMY_DATA.map((_, index) => (
+        {ONBOARDING_DATA.map((_, index) => (
           <View
             key={index}
             style={[
@@ -104,7 +83,7 @@ export default function Onboarding() {
     );
   };
 
-  const isLastSlide = currentIndex === DUMMY_DATA.length - 1;
+  const isLastSlide = currentIndex === ONBOARDING_DATA.length - 1;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -112,7 +91,7 @@ export default function Onboarding() {
 
       <FlatList
         ref={flatListRef}
-        data={DUMMY_DATA}
+        data={ONBOARDING_DATA}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderSlide}
         horizontal
@@ -152,8 +131,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
   },
-  emoji: {
-    fontSize: 150,
+  img: {
+    height: 150,
   },
   textContainer: {
     alignItems: "center",
