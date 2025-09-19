@@ -1,12 +1,19 @@
+import MainHeader from "@/components/MainHeader";
+import { COLORS } from "@/constants/theme";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 export default function Index() {
   return (
-    <View>
-      <Text>Index</Text>
+    <View style={styles.container}>
+      <MainHeader title={"home"} />
     </View>
   );
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+  },
+});

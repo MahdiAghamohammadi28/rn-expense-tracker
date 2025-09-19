@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: COLORS.bg,
+    backgroundColor: COLORS.white,
   },
   img: {
     height: 150,
