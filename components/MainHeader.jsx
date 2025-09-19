@@ -27,6 +27,7 @@ export default function MainHeader({ title, back, notification }) {
       {notification && (
         <TouchableOpacity style={styles.notificationBtn}>
           <SvgIcons name={"bell"} size={24} color={COLORS.black} stroke={1.5} />
+          <View style={styles.notificationIndicator} />
         </TouchableOpacity>
       )}
     </View>
@@ -39,7 +40,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.secondary,
     elevation: 4,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
@@ -61,5 +62,14 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: "75%",
     right: 15,
+  },
+  notificationIndicator: {
+    position: "absolute",
+    width: 8,
+    height: 8,
+    backgroundColor: "red",
+    top: 3,
+    right: 2,
+    borderRadius: 100,
   },
 });
