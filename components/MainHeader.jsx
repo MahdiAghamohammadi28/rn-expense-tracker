@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: COLORS.bg,
+    backgroundColor: COLORS.white,
     elevation: 4,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
