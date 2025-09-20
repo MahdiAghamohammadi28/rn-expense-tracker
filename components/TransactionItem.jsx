@@ -1,9 +1,11 @@
+import { usePathname } from "expo-router";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import SvgIcons from "../constants/SvgIcons";
 import { COLORS } from "../constants/theme";
 
-export default function TransactionItem({ transaction }) {
+export default function TransactionItem({ transaction, onEdit, onDelete }) {
+  const path = usePathname();
   const isExpense = transaction.type === "expense";
   const amountColor = isExpense ? COLORS.error : COLORS.primary;
   const iconName = isExpense ? "arrow-up" : "arrow-down";
@@ -22,7 +24,6 @@ export default function TransactionItem({ transaction }) {
     return `$${parseFloat(amount).toFixed(2)}`;
   };
 
-  console.log("TRANSACTIONS:", transaction);
   return (
     <View style={styles.container}>
       <View style={styles.leftSection}>
@@ -41,7 +42,7 @@ export default function TransactionItem({ transaction }) {
           <Text style={styles.description}>{transaction.description}</Text>
           <Text style={styles.category}>
             <Text style={styles.categoryLabel}>Category: </Text>
-            {transaction.category}
+            {transaction.category_name || "Unknown"}
           </Text>
         </View>
       </View>
@@ -51,6 +52,24 @@ export default function TransactionItem({ transaction }) {
           {formatAmount(transaction.amount)}
         </Text>
         <Text style={styles.date}>{formatDate(transaction.created_at)}</Text>
+        <View style={styles.actionButtons}>
+          {onEdit && path === "/transactions" && (
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => onEdit(transaction)}
+            >
+              <SvgIcons name="edit" size={16} color={COLORS.black} />
+            </TouchableOpacity>
+          )}
+          {onDelete && path === "/transactions" && (
+            <TouchableOpacity
+              style={[styles.actionButton, styles.deleteButton]}
+              onPress={() => onDelete(transaction)}
+            >
+              <SvgIcons name="delete" size={16} color={COLORS.error} />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -114,5 +133,19 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 12,
     color: COLORS.gray,
+    marginBottom: 4,
+  },
+  actionButtons: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 4,
+  },
+  actionButton: {
+    padding: 4,
+    borderRadius: 4,
+    backgroundColor: "#f5f5f5",
+  },
+  deleteButton: {
+    backgroundColor: "#fff5f5",
   },
 });
