@@ -5,7 +5,7 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function MainHeader({ title, back, notification }) {
+export default function MainHeader({ title, back }) {
   const { top } = useSafeAreaInsets();
   const router = useRouter();
 
@@ -24,12 +24,14 @@ export default function MainHeader({ title, back, notification }) {
       <View style={styles.titleWrapper}>
         <Text style={styles.title}>{title}</Text>
       </View>
-      {notification && (
-        <TouchableOpacity style={styles.notificationBtn}>
-          <SvgIcons name={"bell"} size={24} color={COLORS.black} stroke={1.5} />
-          <View style={styles.notificationIndicator} />
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity style={styles.settingsBtn}>
+        <SvgIcons
+          name={"settings"}
+          size={24}
+          color={COLORS.black}
+          stroke={1.5}
+        />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -58,18 +60,9 @@ const styles = StyleSheet.create({
     top: "75%",
     left: 15,
   },
-  notificationBtn: {
+  settingsBtn: {
     position: "absolute",
     top: "75%",
     right: 15,
-  },
-  notificationIndicator: {
-    position: "absolute",
-    width: 8,
-    height: 8,
-    backgroundColor: "red",
-    top: 3,
-    right: 2,
-    borderRadius: 100,
   },
 });
