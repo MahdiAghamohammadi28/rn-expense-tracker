@@ -1,5 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -14,172 +14,97 @@ import { supabase } from "../lib/supabase";
 const { width } = Dimensions.get("window");
 
 export default function BalanceCard() {
-  const [transactions, setTransactions] = useState([]);
+  const [balance, setBalance] = useState(0);
+  const [incomes, setIncomes] = useState(0);
+  const [expenses, setExpenses] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const subscriptionRef = useRef(null);
-  const intervalRef = useRef(null);
 
   useEffect(() => {
-    fetchAllTransactions();
-    setupRealtimeSubscription();
+    fetchTransactionData();
 
-    // Set up interval to refetch every 3 seconds
-    intervalRef.current = setInterval(() => {
-      fetchAllTransactions(false); // Don't show loading for interval refetches
-    }, 3000);
+    // Set up real-time subscription for transaction changes
+    const channel = supabase
+      .channel("balance-card-channel")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "transactions",
+        },
+        (payload) => {
+          console.log("Transaction change received in BalanceCard:", payload);
+          fetchTransactionData();
+        }
+      )
+      .subscribe();
 
-    // Cleanup subscription and interval on unmount
     return () => {
-      if (subscriptionRef.current) {
-        subscriptionRef.current.unsubscribe();
-      }
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      supabase.removeChannel(channel);
     };
-  }, [setupRealtimeSubscription]);
+  }, []);
 
-  const fetchAllTransactions = async (showLoading = true) => {
+  const fetchTransactionData = async () => {
+    setLoading(true);
+    setError(null);
+
     try {
-      if (showLoading) {
-        setLoading(true);
-      }
-      setError(null);
-
-      // Get the current user
+      // Get current user
       const {
         data: { user },
         error: userError,
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        setError("Please log in to view balance");
+        console.error("User not authenticated:", userError);
+        setBalance(0);
+        setIncomes(0);
+        setExpenses(0);
         return;
       }
 
       // Fetch all transactions for the current user
-      const { data, error: fetchError } = await supabase
+      const { data: transactions, error } = await supabase
         .from("transactions")
         .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+        .eq("user_id", user.id);
 
-      if (fetchError) {
-        console.error("Error fetching transactions:", fetchError);
-        setError("Failed to load balance");
+      if (error) {
+        console.error("Error fetching transactions:", error);
+        setError("Failed to fetch transaction data");
         return;
       }
 
-      setTransactions(data || []);
-    } catch (err) {
-      console.error("Unexpected error:", err);
-      setError("Something went wrong");
-    } finally {
-      if (showLoading) {
-        setLoading(false);
-      }
-    }
-  };
+      // Calculate totals
+      let totalIncomes = 0;
+      let totalExpenses = 0;
 
-  const setupRealtimeSubscription = useCallback(async () => {
-    try {
-      // Get the current user
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        console.error("User not authenticated for real-time subscription");
-        return;
-      }
-
-      // Subscribe to changes in the transactions table
-      const subscription = supabase
-        .channel("balance_transactions_changes")
-        .on(
-          "postgres_changes",
-          {
-            event: "*", // Listen to all events (INSERT, UPDATE, DELETE)
-            schema: "public",
-            table: "transactions",
-            filter: `user_id=eq.${user.id}`, // Only listen to changes for current user
-          },
-          (payload) => {
-            console.log("Balance real-time update received:", payload);
-            handleRealtimeUpdate(payload);
+      if (transactions && transactions.length > 0) {
+        transactions.forEach((transaction) => {
+          const amount = parseFloat(transaction.amount) || 0;
+          if (transaction.type === "income") {
+            totalIncomes += amount;
+          } else if (transaction.type === "expense") {
+            totalExpenses += amount;
           }
-        )
-        .subscribe();
-
-      subscriptionRef.current = subscription;
-    } catch (err) {
-      console.error("Error setting up real-time subscription:", err);
-    }
-  }, []);
-
-  const handleRealtimeUpdate = (payload) => {
-    const { eventType, new: newRecord, old: oldRecord } = payload;
-
-    switch (eventType) {
-      case "INSERT":
-        // Add new transaction
-        setTransactions((prevTransactions) => {
-          return [newRecord, ...prevTransactions];
         });
-        break;
+      }
 
-      case "UPDATE":
-        // Update existing transaction
-        setTransactions((prevTransactions) => {
-          return prevTransactions.map((transaction) =>
-            transaction.id === newRecord.id ? newRecord : transaction
-          );
-        });
-        break;
+      const calculatedBalance = totalIncomes - totalExpenses;
 
-      case "DELETE":
-        // Remove deleted transaction
-        setTransactions((prevTransactions) => {
-          return prevTransactions.filter(
-            (transaction) => transaction.id !== oldRecord.id
-          );
-        });
-        break;
-
-      default:
-        console.log("Unhandled event type:", eventType);
+      setIncomes(totalIncomes);
+      setExpenses(totalExpenses);
+      setBalance(calculatedBalance);
+    } catch (error) {
+      console.error("Error calculating transaction data:", error);
+      setError("Failed to calculate balance");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Calculate totals from transactions
-  const calculateTotals = () => {
-    const totals = transactions.reduce(
-      (acc, transaction) => {
-        const amount = parseFloat(transaction.amount) || 0;
-        if (transaction.type === "income") {
-          acc.income += amount;
-        } else if (transaction.type === "expense") {
-          acc.expense += amount;
-        }
-        return acc;
-      },
-      { income: 0, expense: 0 }
-    );
-
-    const balance = totals.income - totals.expense;
-    return {
-      balance,
-      income: totals.income,
-      expense: totals.expense,
-    };
-  };
-
-  const { balance, income, expense } = calculateTotals();
-
-  // Format currency
-  const formatCurrency = (amount) => {
+  const formatAmount = (amount) => {
     return `$${Math.abs(amount).toFixed(2)}`;
   };
 
@@ -219,7 +144,7 @@ export default function BalanceCard() {
         <Text style={styles.balanceLabel}>Your Balance</Text>
         <Text style={styles.balanceValue}>
           {balance >= 0 ? "+" : "-"}
-          {formatCurrency(balance)}
+          {formatAmount(balance)}
         </Text>
       </View>
       <View style={styles.info}>
@@ -230,7 +155,7 @@ export default function BalanceCard() {
             </View>
             <Text style={styles.infoItemLabelText}>Incomes</Text>
           </View>
-          <Text style={styles.infoItemValue}>{formatCurrency(income)}</Text>
+          <Text style={styles.infoItemValue}>+{formatAmount(incomes)}</Text>
         </View>
         <View style={styles.infoItem}>
           <View style={styles.infoItemLabel}>
@@ -239,7 +164,7 @@ export default function BalanceCard() {
             </View>
             <Text style={styles.infoItemLabelText}>Expenses</Text>
           </View>
-          <Text style={styles.infoItemValue}>{formatCurrency(expense)}</Text>
+          <Text style={styles.infoItemValue}>-{formatAmount(expenses)}</Text>
         </View>
       </View>
     </LinearGradient>
