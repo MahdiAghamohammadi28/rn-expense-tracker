@@ -31,15 +31,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="statics"
+        name="budgets"
         options={{
-          title: "Statics",
+          title: "Budgets",
         }}
       />
       <Tabs.Screen
-        name="settings"
+        name="statics"
         options={{
-          title: "Settings",
+          title: "Statics",
         }}
       />
     </Tabs>
