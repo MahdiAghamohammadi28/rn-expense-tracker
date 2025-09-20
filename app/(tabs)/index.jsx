@@ -3,21 +3,18 @@ import MainHeader from "@/components/MainHeader";
 import RecentTransactions from "@/components/RecentTransactions";
 import { COLORS } from "@/constants/theme";
 import React from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 export default function Index() {
   return (
     <View style={styles.container}>
       <MainHeader title={"home"} notification />
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.wrapper}>
           <BalanceCard />
           <RecentTransactions />
         </View>
-      </ScrollView>
+      </View>
     </View>
   );
 }
