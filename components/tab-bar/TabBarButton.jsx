@@ -29,8 +29,8 @@ export default function TabBarButton({
     statics: (props) => (
       <SvgIcons name="pie-chart" stroke={1.5} size={24} {...props} />
     ),
-    settings: (props) => (
-      <SvgIcons name="settings" stroke={1.5} size={24} {...props} />
+    budgets: (props) => (
+      <SvgIcons name="money-bag" stroke={1.5} size={24} {...props} />
     ),
   };
 
