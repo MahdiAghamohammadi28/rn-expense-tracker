@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   StyleSheet,
   Text,
@@ -153,8 +154,51 @@ export default function RecentTransactions() {
     }
   };
 
+  const handleDeleteTransaction = async (transaction) => {
+    Alert.alert(
+      "Delete Transaction",
+      `Are you sure you want to delete "${transaction.title}"? This action cannot be undone.`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setLoading(true);
+
+              const { error } = await supabase
+                .from("transactions")
+                .delete()
+                .eq("id", transaction.id);
+
+              if (error) {
+                console.error("Error deleting transaction:", error);
+                Alert.alert("Error", "Failed to delete transaction");
+                return;
+              }
+
+              Alert.alert("Success", "Transaction deleted successfully!");
+
+              // Refresh the transactions list
+              fetchRecentTransactions();
+            } catch (error) {
+              console.error("Error deleting transaction:", error);
+              Alert.alert("Error", "Failed to delete transaction");
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const renderTransaction = ({ item }) => (
-    <TransactionItem transaction={item} />
+    <TransactionItem transaction={item} onDelete={handleDeleteTransaction} />
   );
 
   const renderEmptyState = () => (
@@ -219,7 +263,8 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     elevation: 1.5,
-    height: "100%",
+    height: "70%",
+    paddingBottom: 110,
   },
   header: {
     flexDirection: "row",
